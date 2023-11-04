@@ -3,7 +3,7 @@ import platform
 
 IS_WIN = platform.system() == 'Windows'
 
-from PyQt5.QtCore import pyqtSlot, pyqtProperty, pyqtSignal, QObject, QUrl
+from PyQt5.QtCore import pyqtSlot, pyqtProperty, pyqtSignal, QObject, QUrl, QThread
 from PyQt5.QtGui import QDesktopServices
 from PyQt5.QtWidgets import QApplication
 
@@ -13,6 +13,10 @@ import misc
 import git
 
 SOURCE_REPO = "https://github.com/arenasys/PyQt5-QML-Template"
+
+class Update(QThread):
+    def run(self):
+        git.git_reset(".", SOURCE_REPO)
 
 class GUI(QObject):
     updated = pyqtSignal()
@@ -26,10 +30,10 @@ class GUI(QObject):
 
         self._needRestart = False
         self._gitInfo = None
-        self._currentGitCommit = None
+        self._gitCommit = None
         self._triedGitInit = False
         self._updating = False
-        self.getGitInfo()
+        self.getVersionInfo()
 
     @pyqtProperty('QString', notify=updated)
     def title(self):
@@ -70,7 +74,7 @@ class GUI(QObject):
             self.openPath(folder)
 
     @pyqtProperty(str, notify=updated)
-    def gitInfo(self):
+    def versionInfo(self):
         return self._gitInfo
 
     @pyqtProperty(bool, notify=updated)
@@ -82,15 +86,25 @@ class GUI(QObject):
         return self._updating
 
     @pyqtSlot()
-    def getGitInfo(self):
+    def getVersionInfo(self):
+        self._updating = False
         self._gitInfo = "Unknown"
-        commit, label = git.git_last(".")
+        commit, label = git.gitLast(".")
         if commit:
-            if self._currentGitCommit == None:
-                self._currentGitCommit = commit
+            if self._gitCommit == None:
+                self._gitCommit = commit
             self._gitInfo = label
-            self._needRestart = self._currentGitCommit != commit
+            print(label)
+            self._needRestart = self._gitCommit != commit
         elif not self._triedGitInit:
             self._triedGitInit = True
             git.gitInit(".", SOURCE_REPO)
+        self.updated.emit()
+
+    @pyqtSlot()
+    def update(self):
+        self._updating = True
+        update = Update(self)
+        update.finished.connect(self.getVersionInfo)
+        update.start()
         self.updated.emit()

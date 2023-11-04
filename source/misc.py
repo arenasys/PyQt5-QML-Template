@@ -207,6 +207,14 @@ def sortFiles(files):
 def formatFloat(f):
     return f"{f:.4f}".rstrip('0').rstrip('.')
 
+class Update(QThread):
+    def run(self):
+        git.git_reset(".", git.QDIFF_URL)
+        inf = os.path.join("source", "sd-inference-server")
+        if os.path.exists(inf):
+            git.git_reset(inf, git.INFER_URL)
+
+
 def registerTypes():
     qmlRegisterType(FocusReleaser, "gui", 1, 0, "FocusReleaser")
     qmlRegisterType(DropArea, "gui", 1, 0, "AdvancedDropArea")

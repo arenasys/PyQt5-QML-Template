@@ -111,9 +111,10 @@ FocusReleaser {
             Rectangle {
                 id: textBox
                 anchors.left: parent.left
-                anchors.right: parent.right
+                anchors.right: updateBox.left
                 anchors.bottom: parent.bottom
-                height: 100
+                height: 150
+                anchors.rightMargin: 5
 
                 border.width: 1
                 border.color: COMMON.bg4
@@ -148,6 +149,92 @@ FocusReleaser {
                     anchors.bottom: parent.bottom
                     anchors.margins: 1
                     text: "Blah Blah"
+                }
+            }
+
+            Rectangle {
+                id: updateBox
+                anchors.right: parent.right
+                anchors.bottom: parent.bottom
+                height: 150
+                width: 300
+
+                border.width: 1
+                border.color: COMMON.bg4
+                color: COMMON.bg0
+                clip: true
+
+                Rectangle {
+                    id: updateBoxHeader
+                    anchors.top: parent.top
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    height: 25
+                    border.width: 1
+                    border.color: COMMON.bg4
+                    color: COMMON.bg3
+                    
+                    SText {
+                        anchors.fill: parent
+                        text: "Update area"
+                        color: COMMON.fg1_5
+                        leftPadding: 5
+                        verticalAlignment: Text.AlignVCenter
+                    }
+                }
+
+                Rectangle {
+                    id: updateBoxArea
+                    color: COMMON.bg1
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.top: updateBoxHeader.bottom
+                    anchors.bottom: parent.bottom
+                    anchors.margins: 1
+
+                    SText {
+                        anchors.top: parent.top
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.bottom: updateButton.top
+                        text: GUI.versionInfo
+                        color: COMMON.fg1_5
+                        verticalAlignment: Text.AlignVCenter
+                        horizontalAlignment: Text.AlignHCenter
+                    }
+
+                    SButton {
+                        id: updateButton
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.bottom: parent.bottom
+                        height: 30
+                        label: disabled ? "" : "Update"
+                        disabled: GUI.updating || GUI.needRestart
+
+                        onPressed: {
+                            GUI.update()
+                        }
+
+                        SText {
+                            anchors.fill: parent
+                            visible: GUI.needRestart
+                            text: "Restart required"
+                            color: COMMON.accent(0)
+                            verticalAlignment: Text.AlignVCenter
+                            horizontalAlignment: Text.AlignHCenter
+                            pointSize: 9.0
+                        }
+
+                        LoadingSpinner {
+                            anchors.centerIn: parent
+                            height: 20
+                            width: height
+                            size: 20
+                            running: GUI.updating
+                            source: "qrc:/icons/loading_big.svg"
+                        }
+                    }
                 }
             }
         }

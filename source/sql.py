@@ -1,7 +1,5 @@
 import random
-import sys
 from typing import *
-import time
 
 from PyQt5.QtCore import pyqtProperty, pyqtSlot, pyqtSignal, Qt, QObject, QThread, QAbstractListModel, QByteArray, QModelIndex, QTimer, QVariant
 from PyQt5.QtSql import QSqlDatabase, QSqlQuery, QSqlDriver
