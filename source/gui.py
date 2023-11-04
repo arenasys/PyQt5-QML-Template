@@ -1,4 +1,6 @@
 import os
+import random
+import string
 import platform
 
 IS_WIN = platform.system() == 'Windows'
@@ -6,6 +8,7 @@ IS_WIN = platform.system() == 'Windows'
 from PyQt5.QtCore import pyqtSlot, pyqtProperty, pyqtSignal, QObject, QUrl, QThread
 from PyQt5.QtGui import QDesktopServices
 from PyQt5.QtWidgets import QApplication
+from PyQt5.QtSql import QSqlQuery
 
 import sql
 import thumbnails
@@ -16,7 +19,7 @@ SOURCE_REPO = "https://github.com/arenasys/PyQt5-QML-Template"
 
 class Update(QThread):
     def run(self):
-        git.git_reset(".", SOURCE_REPO)
+        git.gitReset(".", SOURCE_REPO)
 
 class GUI(QObject):
     updated = pyqtSignal()
@@ -34,6 +37,9 @@ class GUI(QObject):
         self._triedGitInit = False
         self._updating = False
         self.getVersionInfo()
+
+        self.conn = None
+        self.populateDatabase()
 
     @pyqtProperty('QString', notify=updated)
     def title(self):
@@ -108,3 +114,26 @@ class GUI(QObject):
         update.finished.connect(self.getVersionInfo)
         update.start()
         self.updated.emit()
+
+    @pyqtSlot()
+    def populateDatabase(self):
+        partial = True
+        if not self.conn:
+            self.conn = sql.Connection(self)
+            self.conn.connect()
+            self.conn.doQuery("CREATE TABLE data(a TEXT, b TEXT, idx INTEGER UNIQUE);")
+            self.conn.enableNotifications("data")
+            partial = False
+
+        for i in range(1,100):
+            if partial and random.SystemRandom().random() < 0.7:
+                continue
+
+            q = QSqlQuery(self.conn.db)
+            q.prepare("INSERT OR REPLACE INTO data(a, b, idx) VALUES (:a, :b, :idx);")
+            a = ''.join(random.SystemRandom().choice(string.ascii_letters + string.digits) for _ in range(8))
+            b = ''.join(random.SystemRandom().choice(string.ascii_letters + string.digits) for _ in range(8))
+            q.bindValue(":a", a)
+            q.bindValue(":b", b)
+            q.bindValue(":idx", i)
+            self.conn.doQuery(q)

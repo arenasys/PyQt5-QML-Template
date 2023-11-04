@@ -36,7 +36,7 @@ FocusReleaser {
         anchors.bottom: parent.bottom
 
         Item {
-            anchors.left: parent.left
+            anchors.right: parent.right
             anchors.top: parent.top
             anchors.margins: 20
 
@@ -110,9 +110,9 @@ FocusReleaser {
 
             Rectangle {
                 id: textBox
-                anchors.left: parent.left
-                anchors.right: updateBox.left
+                anchors.right: sqlBox.left
                 anchors.bottom: parent.bottom
+                width: Math.max(150, sqlBox.x - 5)
                 height: 150
                 anchors.rightMargin: 5
 
@@ -149,6 +149,149 @@ FocusReleaser {
                     anchors.bottom: parent.bottom
                     anchors.margins: 1
                     text: "Blah Blah"
+                }
+            }
+
+            Rectangle {
+                id: sqlBox
+                anchors.right: updateBox.left
+                anchors.bottom: parent.bottom
+                anchors.rightMargin: 5
+                height: 150
+                width: 300
+
+                border.width: 1
+                border.color: COMMON.bg4
+                color: COMMON.bg0
+                clip: true
+
+                Rectangle {
+                    id: sqlBoxHeader
+                    anchors.top: parent.top
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    height: 25
+                    border.width: 1
+                    border.color: COMMON.bg4
+                    color: COMMON.bg3
+                    
+                    SText {
+                        anchors.fill: parent
+                        text: "SQL area"
+                        color: COMMON.fg1_5
+                        leftPadding: 5
+                        verticalAlignment: Text.AlignVCenter
+                    }
+
+                    SIconButton {
+                        anchors.top: parent.top
+                        anchors.bottom: parent.bottom
+                        anchors.right: parent.right
+                        anchors.margins: 1
+                        height: 23
+                        width: 23
+                        tooltip: "Populate"
+                        icon: "qrc:/icons/placeholder_black.svg"
+                        inset: 8
+                        onPressed: {
+                            GUI.populateDatabase()
+                        }
+                    }
+                }
+
+                Rectangle {
+                    id: sqlBoxArea
+                    color: COMMON.bg1
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.top: sqlBoxHeader.bottom
+                    anchors.bottom: parent.bottom
+                    anchors.margins: 1
+                    anchors.topMargin: 0
+
+                    ListView {
+                        id: sqlListView
+                        interactive: false
+                        boundsBehavior: Flickable.StopAtBounds
+                        displayMarginBeginning: 1
+                        displayMarginEnd: 1
+                        clip: true
+                        width: parent.width
+                        height: Math.min(contentHeight, parent.height)
+
+                        model: Sql {
+                            query: "SELECT * FROM data ORDER BY idx DESC;"
+                        }
+
+                        ScrollBar.vertical: SScrollBarV {
+                            id: scrollBar
+                            policy: sqlListView.contentHeight > sqlListView.height ? ScrollBar.AlwaysOn : ScrollBar.AlwaysOff
+                        }
+
+                        delegate: Item {
+                            width: sqlListView.width
+                            height: 20
+
+                            Rectangle {
+                                anchors.fill: parent
+                                anchors.leftMargin: 11
+                                anchors.rightMargin: 11
+                                color: (index % 2 == 0 ? COMMON.bg1 : COMMON.bg0)
+
+                                Row {
+                                    anchors.fill: parent
+                                    property var size: width / 3 - 1
+                                    Rectangle {
+                                        width: 1
+                                        height: 20
+                                        color: COMMON.bg4
+                                    }
+                                    SText {
+                                        text: sql_a
+                                        height: 20
+                                        width: parent.size
+                                        verticalAlignment: Text.AlignVCenter
+                                        horizontalAlignment: Text.AlignHCenter
+                                        pointSize: 9.8
+                                        color: COMMON.fg1
+                                    }
+                                    Rectangle {
+                                        width: 1
+                                        height: 20
+                                        color: COMMON.bg4
+                                    }
+                                    SText {
+                                        text: sql_b
+                                        height: 20
+                                        width: parent.size
+                                        verticalAlignment: Text.AlignVCenter
+                                        horizontalAlignment: Text.AlignHCenter
+                                        pointSize: 9.8
+                                        color: COMMON.fg1
+                                    }
+                                    Rectangle {
+                                        width: 1
+                                        height: 20
+                                        color: COMMON.bg4
+                                    }
+                                    SText {
+                                        text: sql_idx
+                                        height: 20
+                                        width: parent.size
+                                        verticalAlignment: Text.AlignVCenter
+                                        horizontalAlignment: Text.AlignHCenter
+                                        pointSize: 9.8
+                                        color: COMMON.fg1
+                                    }
+                                    Rectangle {
+                                        width: 1
+                                        height: 20
+                                        color: COMMON.bg4
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
@@ -198,7 +341,8 @@ FocusReleaser {
                         anchors.right: parent.right
                         anchors.bottom: updateButton.top
                         text: GUI.versionInfo
-                        color: COMMON.fg1_5
+                        pointSize: 9.8
+                        color: COMMON.fg1
                         verticalAlignment: Text.AlignVCenter
                         horizontalAlignment: Text.AlignHCenter
                     }
