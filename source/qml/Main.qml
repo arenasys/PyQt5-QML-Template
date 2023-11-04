@@ -225,7 +225,20 @@ FocusReleaser {
 
                         ScrollBar.vertical: SScrollBarV {
                             id: scrollBar
+                            stepSize: 1/Math.ceil(sqlListView.contentHeight/20)
                             policy: sqlListView.contentHeight > sqlListView.height ? ScrollBar.AlwaysOn : ScrollBar.AlwaysOff
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            acceptedButtons: Qt.NoButton
+                            onWheel: {
+                                if(wheel.angleDelta.y < 0) {
+                                    scrollBar.increase()
+                                } else {
+                                    scrollBar.decrease()
+                                }
+                            }
                         }
 
                         delegate: Item {

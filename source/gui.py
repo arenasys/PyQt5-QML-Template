@@ -100,7 +100,6 @@ class GUI(QObject):
             if self._gitCommit == None:
                 self._gitCommit = commit
             self._gitInfo = label
-            print(label)
             self._needRestart = self._gitCommit != commit
         elif not self._triedGitInit:
             self._triedGitInit = True
